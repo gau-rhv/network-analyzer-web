@@ -92,7 +92,9 @@ body {
 
 /* Inputs */
 .glass-select,
-.glass-input {
+.glass-input,
+.form-control,
+.form-select {
     background: var(--bg-card) !important;
     border: 1px solid var(--border) !important;
     color: var(--text) !important;
@@ -101,10 +103,28 @@ body {
 }
 
 .glass-select:focus,
-.glass-input:focus {
+.glass-input:focus,
+.form-control:focus,
+.form-select:focus {
     border-color: var(--text-dim) !important;
+    background: var(--bg-card) !important;
+    color: var(--text) !important;
     box-shadow: none !important;
     outline: none;
+}
+
+/* Fix Placeholders */
+::placeholder {
+    color: var(--text-dim) !important;
+    opacity: 0.7 !important;
+}
+
+:-ms-input-placeholder {
+    color: var(--text-dim) !important;
+}
+
+::-ms-input-placeholder {
+    color: var(--text-dim) !important;
 }
 
 .glass-select option {
@@ -322,35 +342,49 @@ canvas {
 }
 
 .table {
-    color: var(--text);
+    color: var(--text) !important;
     font-size: 0.85rem;
-    background: transparent !important;
     --bs-table-bg: transparent !important;
-    --bs-table-striped-bg: transparent !important;
+    --bs-table-color: var(--text) !important;
+    background-color: transparent !important;
+}
+
+.table> :not(caption)>*>* {
+    background-color: transparent !important;
+    color: var(--text) !important;
+    box-shadow: none !important;
 }
 
 .table thead {
-    background: var(--bg-dark);
+    background: var(--bg-dark) !important;
     position: sticky;
     top: 0;
+    z-index: 10;
 }
 
 .table thead th {
+    background: var(--bg-dark) !important;
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.3px;
     font-weight: 500;
-    color: var(--text-dim);
+    color: var(--text-dim) !important;
     border: none;
     padding: 0.75rem;
+    border-bottom: 1px solid var(--border);
 }
 
 .table tbody tr {
     border-bottom: 1px solid var(--border);
+    background: transparent !important;
 }
 
 .table tbody tr:hover {
-    background: var(--bg-hover);
+    background: var(--bg-hover) !important;
+}
+
+.table tbody tr:hover>* {
+    background: var(--bg-hover) !important;
 }
 
 .table td {
@@ -358,7 +392,6 @@ canvas {
     border: none;
     vertical-align: middle;
     background: transparent !important;
-    color: var(--text) !important;
 }
 
 .table code {
