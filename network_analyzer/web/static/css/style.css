@@ -324,6 +324,9 @@ canvas {
 .table {
     color: var(--text);
     font-size: 0.85rem;
+    background: transparent !important;
+    --bs-table-bg: transparent !important;
+    --bs-table-striped-bg: transparent !important;
 }
 
 .table thead {
@@ -354,6 +357,8 @@ canvas {
     padding: 0.6rem 0.75rem;
     border: none;
     vertical-align: middle;
+    background: transparent !important;
+    color: var(--text) !important;
 }
 
 .table code {
