@@ -52,7 +52,7 @@ const chartOptions = {
             labels: {
                 padding: 15,
                 font: { size: 11, weight: '500' },
-                color: '#94a3b8',
+                color: '#e5e5e5', // Brighter text
                 usePointStyle: true
             }
         }
@@ -83,11 +83,13 @@ function initializeCharts() {
             plugins: {
                 ...chartOptions.plugins,
                 tooltip: {
-                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                    titleColor: '#f1f5f9',
-                    bodyColor: '#94a3b8',
+                    backgroundColor: 'rgba(20, 20, 20, 0.9)',
+                    titleColor: '#fff',
+                    bodyColor: '#ccc',
                     padding: 12,
-                    cornerRadius: 8
+                    cornerRadius: 8,
+                    borderColor: '#333',
+                    borderWidth: 1
                 }
             }
         }
@@ -124,18 +126,18 @@ function initializeCharts() {
                 y: {
                     beginAtZero: true,
                     grid: {
-                        color: 'rgba(148, 163, 184, 0.1)',
+                        color: 'rgba(255, 255, 255, 0.1)',
                         drawBorder: false
                     },
                     ticks: {
-                        color: '#94a3b8',
+                        color: '#999',
                         font: { size: 10 }
                     }
                 },
                 x: {
                     grid: { display: false },
                     ticks: {
-                        color: '#94a3b8',
+                        color: '#999',
                         font: { size: 10 },
                         maxRotation: 0
                     }
@@ -143,6 +145,7 @@ function initializeCharts() {
             }
         }
     });
+
 }
 
 // Load available network interfaces

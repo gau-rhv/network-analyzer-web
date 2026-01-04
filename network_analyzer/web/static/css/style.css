@@ -1,12 +1,11 @@
 /* Network Analyzer - Monochrome Theme */
 :root {
-    --bg-dark: #0a0a0a;
-    --bg-card: #151515;
-    --bg-hover: #1f1f1f;
-    --border: #2a2a2a;
-    --text: #ffffff;
-    --text-dim: #999;
-    --text-header: #ccc;
+    --bg-dark: #111;
+    --bg-card: #1a1a1a;
+    --bg-hover: #222;
+    --border: #333;
+    --text: #e5e5e5;
+    --text-dim: #ece6e6;
     --accent: #fff;
     --success: #4ade80;
     --warning: #fbbf24;
@@ -243,20 +242,18 @@ body {
 }
 
 /* Chart Cards */
-.chart-card .card-header,
-.glass-card .card-header {
-    background: var(--bg-hover);
+.chart-card .card-header {
+    background: transparent;
     border-bottom: 1px solid var(--border);
-    color: #fff;
+    color: var(--text);
     font-weight: 500;
-    font-size: 0.9rem;
-    padding: 0.85rem 1rem;
+    font-size: 0.85rem;
+    padding: 0.75rem 1rem;
 }
 
-.chart-card .card-header i,
-.glass-card .card-header i {
-    color: #aaa;
-    margin-right: 0.5rem;
+.chart-card .card-header i {
+    color: var(--text-dim);
+    margin-right: 0.4rem;
 }
 
 .chart-card .card-body {
@@ -694,11 +691,73 @@ canvas {
     color: var(--text);
 }
 
-.btn-outline-primary:hover,
-.btn-outline-success:hover,
-.btn-outline-danger:hover,
-.btn-outline-warning:hover {
-    background: var(--bg-hover);
-    border-color: #444;
-    color: var(--text);
+
+/* Text Visibility Overrides */
+.text-primary,
+.text-secondary,
+.text-success,
+.text-danger,
+.text-warning,
+.text-info,
+.text-muted,
+.text-white,
+.text-body {
+    color: var(--text) !important;
+}
+
+.card-title,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--text) !important;
+}
+
+.text-muted {
+    color: var(--text-dim) !important;
+}
+
+/* Specific component fixes */
+.stats-card h2 {
+    color: #fff !important;
+}
+
+.alert-summary-card h3 {
+    color: #fff !important;
+}
+
+.log-file-item {
+    color: var(--text) !important;
+}
+
+.log-file-item small {
+    color: var(--text-dim) !important;
+}
+
+/* Ensure all card headers are visible */
+.card-header {
+    color: #fff !important;
+    background: var(--bg-hover) !important;
+}
+
+/* Ensure inputs are visible */
+input,
+select,
+textarea {
+    color: #fff !important;
+    background: var(--bg-card) !important;
+}
+
+/* Fix chart legends */
+.chart-js-legend,
+.chart-legend {
+    color: #fff !important;
 }
