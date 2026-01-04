@@ -69,12 +69,12 @@ function initializeCharts() {
             datasets: [{
                 data: [],
                 backgroundColor: [
-                    '#6366f1', '#8b5cf6', '#06b6d4', '#10b981',
-                    '#f59e0b', '#ef4444', '#ec4899', '#14b8a6'
+                    '#fff', '#ccc', '#999', '#777',
+                    '#555', '#444', '#333', '#222'
                 ],
-                borderColor: 'rgba(15, 23, 42, 0.8)',
-                borderWidth: 3,
-                hoverOffset: 10
+                borderColor: '#111',
+                borderWidth: 2,
+                hoverOffset: 8
             }]
         },
         options: {
@@ -96,8 +96,8 @@ function initializeCharts() {
     // Packet Rate Chart (Line)
     const rateCtx = document.getElementById('rate-chart').getContext('2d');
     const gradient = rateCtx.createLinearGradient(0, 0, 0, 280);
-    gradient.addColorStop(0, 'rgba(99, 102, 241, 0.3)');
-    gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.15)');
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
     chartInstances.rate = new Chart(rateCtx, {
         type: 'line',
@@ -106,16 +106,16 @@ function initializeCharts() {
             datasets: [{
                 label: 'Packets/sec',
                 data: [],
-                borderColor: '#6366f1',
+                borderColor: '#fff',
                 backgroundColor: gradient,
-                borderWidth: 3,
+                borderWidth: 2,
                 fill: true,
-                tension: 0.4,
+                tension: 0.3,
                 pointRadius: 0,
-                pointHoverRadius: 6,
-                pointBackgroundColor: '#6366f1',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2
+                pointHoverRadius: 4,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#111',
+                pointBorderWidth: 1
             }]
         },
         options: {
