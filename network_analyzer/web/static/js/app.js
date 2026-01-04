@@ -1,7 +1,5 @@
-// Network Analyzer - Enhanced Dashboard JavaScript
 const socket = io();
 
-// State
 let isCapturing = false;
 let captureStartTime = null;
 let lastPacketCount = 0;
@@ -12,18 +10,12 @@ let allAlerts = [];
 let alertCounts = { critical: 0, warning: 0, info: 0 };
 let ipStats = { sources: {}, destinations: {} };
 
-// Initialize
 document.addEventListener('DOMContentLoaded', () => {
     initializeCharts();
     loadInterfaces();
     updateStatusBadge('connected');
 
-    // Load initial stats
-    fetch('/api/stats')
-        .then(r => r.json())
-        .then(stats => updateStats(stats));
-
-    // Add row animation styles
+    fetch('/api/stats').then(r => r.json()).then(stats => updateStats(stats));
     addDynamicStyles();
 });
 
@@ -52,7 +44,7 @@ const chartOptions = {
             labels: {
                 padding: 15,
                 font: { size: 11, weight: '500' },
-                color: '#e5e5e5', // Brighter text
+                color: '#e5e5e5',
                 usePointStyle: true
             }
         }
@@ -60,7 +52,6 @@ const chartOptions = {
 };
 
 function initializeCharts() {
-    // Protocol Distribution Chart (Doughnut)
     const protocolCtx = document.getElementById('protocol-chart').getContext('2d');
     chartInstances.protocol = new Chart(protocolCtx, {
         type: 'doughnut',
@@ -68,10 +59,7 @@ function initializeCharts() {
             labels: [],
             datasets: [{
                 data: [],
-                backgroundColor: [
-                    '#fff', '#ccc', '#999', '#777',
-                    '#555', '#444', '#333', '#222'
-                ],
+                backgroundColor: ['#fff', '#ccc', '#999', '#777', '#555', '#444', '#333', '#222'],
                 borderColor: '#111',
                 borderWidth: 2,
                 hoverOffset: 8
@@ -95,7 +83,6 @@ function initializeCharts() {
         }
     });
 
-    // Packet Rate Chart (Line)
     const rateCtx = document.getElementById('rate-chart').getContext('2d');
     const gradient = rateCtx.createLinearGradient(0, 0, 0, 280);
     gradient.addColorStop(0, 'rgba(255, 255, 255, 0.15)');
@@ -125,27 +112,16 @@ function initializeCharts() {
             scales: {
                 y: {
                     beginAtZero: true,
-                    grid: {
-                        color: 'rgba(255, 255, 255, 0.1)',
-                        drawBorder: false
-                    },
-                    ticks: {
-                        color: '#999',
-                        font: { size: 10 }
-                    }
+                    grid: { color: 'rgba(255, 255, 255, 0.1)', drawBorder: false },
+                    ticks: { color: '#999', font: { size: 10 } }
                 },
                 x: {
                     grid: { display: false },
-                    ticks: {
-                        color: '#999',
-                        font: { size: 10 },
-                        maxRotation: 0
-                    }
+                    ticks: { color: '#999', font: { size: 10 }, maxRotation: 0 }
                 }
             }
         }
     });
-
 }
 
 // Load available network interfaces
@@ -173,7 +149,6 @@ async function loadInterfaces() {
     }
 }
 
-// Start packet capture
 async function startCapture() {
     const interfaceEl = document.getElementById('interface-select');
     const iface = interfaceEl.value;
@@ -210,7 +185,6 @@ async function startCapture() {
     }
 }
 
-// Stop packet capture
 async function stopCapture() {
     try {
         const response = await fetch('/api/stop-capture', { method: 'POST' });
@@ -226,6 +200,52 @@ async function stopCapture() {
         console.error('Error stopping capture:', error);
         showToast('Failed to stop capture', 'error');
     }
+}
+
+async function resetDashboard() {
+    if (!confirm('Are you sure you want to clear all data?')) return;
+
+    try {
+        const response = await fetch('/api/reset', { method: 'POST' });
+        if (response.ok) {
+            clearLocalData();
+            showToast('Dashboard reset', 'success');
+        }
+    } catch (error) {
+        console.error('Error resetting dashboard:', error);
+        showToast('Failed to reset', 'error');
+    }
+}
+
+function clearLocalData() {
+    allPackets = [];
+    allAlerts = [];
+    alertCounts = { critical: 0, warning: 0, info: 0 };
+    ipStats = { sources: {}, destinations: {} };
+    statsBuffer = [];
+
+    document.getElementById('packets-count-badge').textContent = '0';
+    document.getElementById('total-packets').textContent = '0';
+    document.getElementById('total-bytes').textContent = '0 MB';
+    document.getElementById('packets-per-sec').textContent = '0';
+    document.getElementById('packets-tbody').innerHTML = `
+        <tr class="empty-row">
+            <td colspan="8" class="text-center text-muted py-5">
+                <i class="fas fa-satellite-dish fa-3x mb-3 d-block opacity-50"></i>
+                Waiting for packets...
+            </td>
+        </tr>`;
+
+    clearAlerts();
+    updateTopIPs();
+
+    chartInstances.protocol.data.labels = [];
+    chartInstances.protocol.data.datasets[0].data = [];
+    chartInstances.protocol.update();
+
+    chartInstances.rate.data.labels = [];
+    chartInstances.rate.data.datasets[0].data = [];
+    chartInstances.rate.update();
 }
 
 // Update status badge
@@ -699,6 +719,14 @@ socket.on('packet_update', (packet) => {
 
 socket.on('stats_update', (stats) => {
     updateStats(stats);
+});
+
+socket.on('reset', () => {
+    clearLocalData();
+});
+
+socket.on('reset', () => {
+    clearLocalData();
 });
 
 socket.on('error', (data) => {

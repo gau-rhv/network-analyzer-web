@@ -1,8 +1,3 @@
-"""
-Packet Analysis Module
-Analyzes packet headers, payloads, and extracts protocol-specific information
-"""
-
 from scapy.all import IP, TCP, UDP, ICMP, Raw
 from typing import Optional, Dict, Any
 import logging
@@ -11,26 +6,14 @@ logger = logging.getLogger(__name__)
 
 
 class PacketAnalyzer:
-    """Analyzes individual packets and extracts detailed information"""
-    
     @staticmethod
     def analyze_packet(packet) -> Dict[str, Any]:
-        """
-        Comprehensive packet analysis
-        
-        Args:
-            packet: Scapy packet object
-        
-        Returns:
-            Dictionary containing packet analysis
-        """
         analysis = {
             "timestamp": packet.time if hasattr(packet, 'time') else None,
             "size": len(packet),
             "layers": packet.layers(),
         }
         
-        # IP Layer Analysis
         if IP in packet:
             ip_layer = packet[IP]
             analysis["ip"] = {
@@ -44,7 +27,6 @@ class PacketAnalyzer:
                 "length": ip_layer.len
             }
         
-        # TCP Layer Analysis
         if TCP in packet:
             tcp_layer = packet[TCP]
             analysis["tcp"] = {
@@ -57,7 +39,6 @@ class PacketAnalyzer:
                 "payload_size": len(tcp_layer.payload)
             }
         
-        # UDP Layer Analysis
         if UDP in packet:
             udp_layer = packet[UDP]
             analysis["udp"] = {
@@ -67,7 +48,6 @@ class PacketAnalyzer:
                 "payload_size": len(udp_layer.payload)
             }
         
-        # ICMP Layer Analysis
         if ICMP in packet:
             icmp_layer = packet[ICMP]
             analysis["icmp"] = {
@@ -77,7 +57,6 @@ class PacketAnalyzer:
                 "sequence": getattr(icmp_layer, 'seq', None)
             }
         
-        # Payload Analysis
         if Raw in packet:
             raw_payload = packet[Raw].load
             analysis["payload"] = {
@@ -90,7 +69,6 @@ class PacketAnalyzer:
     
     @staticmethod
     def _is_ascii(data: bytes) -> bool:
-        """Check if data is mostly ASCII"""
         try:
             ascii_count = sum(1 for byte in data if 32 <= byte < 127)
             return ascii_count / len(data) > 0.8 if data else False
@@ -99,12 +77,6 @@ class PacketAnalyzer:
     
     @staticmethod
     def get_protocol_info(packet) -> Dict[str, str]:
-        """
-        Get protocol information from packet
-        
-        Returns:
-            Dictionary with protocol names
-        """
         protocols = {}
         
         if IP in packet:
@@ -121,15 +93,6 @@ class PacketAnalyzer:
     
     @staticmethod
     def analyze(packet) -> Dict[str, Any]:
-        """
-        Simplified packet analysis for web interface
-        
-        Args:
-            packet: Scapy packet object
-        
-        Returns:
-            Dictionary with simplified packet information
-        """
         result = {
             'source_ip': 'N/A',
             'dest_ip': 'N/A',
@@ -139,12 +102,10 @@ class PacketAnalyzer:
             'flags': []
         }
         
-        # Extract IP information
         if IP in packet:
             result['source_ip'] = packet[IP].src
             result['dest_ip'] = packet[IP].dst
         
-        # Extract TCP information
         if TCP in packet:
             result['source_port'] = packet[TCP].sport
             result['dest_port'] = packet[TCP].dport
@@ -152,12 +113,10 @@ class PacketAnalyzer:
             if flags:
                 result['flags'] = [flags]
         
-        # Extract UDP information
         elif UDP in packet:
             result['source_port'] = packet[UDP].sport
             result['dest_port'] = packet[UDP].dport
         
-        # Extract ICMP information
         elif ICMP in packet:
             result['source_port'] = 'N/A'
             result['dest_port'] = 'N/A'
@@ -166,7 +125,6 @@ class PacketAnalyzer:
     
     @staticmethod
     def extract_summary(packet) -> str:
-        """Extract human-readable packet summary"""
         layers = []
         
         if IP in packet:

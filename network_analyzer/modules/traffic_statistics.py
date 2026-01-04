@@ -1,8 +1,3 @@
-"""
-Traffic Statistics Module
-Calculates bandwidth usage, packet counts, and network performance metrics
-"""
-
 from scapy.all import IP, TCP, UDP
 from typing import Dict, Optional
 from collections import defaultdict
@@ -11,12 +6,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
 class TrafficStatistics:
-    """Collects and analyzes traffic statistics"""
+    
     
     def __init__(self):
-        """Initialize traffic statistics"""
+        
         self.total_packets = 0
         self.total_bytes = 0
         self.start_time = datetime.now()
@@ -25,12 +19,11 @@ class TrafficStatistics:
         self.flow_stats = defaultdict(lambda: {"packets": 0, "bytes": 0})
     
     def process_packet(self, packet):
-        """Process packet and update statistics"""
+        
         packet_size = len(packet)
         self.total_packets += 1
         self.total_bytes += packet_size
         
-        # IP Statistics
         if IP in packet:
             ip_layer = packet[IP]
             src_ip = ip_layer.src
@@ -42,12 +35,10 @@ class TrafficStatistics:
             self.ip_stats[dst_ip]["packets"] += 1
             self.ip_stats[dst_ip]["bytes"] += packet_size
             
-            # Flow Statistics (src-dst pairs)
             flow_key = f"{src_ip} -> {dst_ip}"
             self.flow_stats[flow_key]["packets"] += 1
             self.flow_stats[flow_key]["bytes"] += packet_size
         
-        # Protocol Statistics
         if TCP in packet:
             protocol = "TCP"
         elif UDP in packet:
@@ -59,7 +50,7 @@ class TrafficStatistics:
         self.protocol_stats[protocol]["bytes"] += packet_size
     
     def get_bandwidth_stats(self) -> Dict[str, float]:
-        """Calculate bandwidth usage statistics"""
+        
         elapsed = (datetime.now() - self.start_time).total_seconds()
         
         if elapsed == 0:
@@ -78,11 +69,10 @@ class TrafficStatistics:
         }
     
     def get_ip_statistics(self, limit: Optional[int] = None) -> Dict[str, dict]:
-        """Get statistics per IP address"""
+        
         stats = dict(self.ip_stats)
         
         if limit:
-            # Sort by bytes and return top N
             sorted_stats = sorted(
                 stats.items(),
                 key=lambda x: x[1]["bytes"],
@@ -93,11 +83,11 @@ class TrafficStatistics:
         return stats
     
     def get_protocol_statistics(self) -> Dict[str, dict]:
-        """Get statistics per protocol"""
+        
         return dict(self.protocol_stats)
     
     def get_flow_statistics(self, limit: Optional[int] = None) -> Dict[str, dict]:
-        """Get statistics per flow (src -> dst)"""
+        
         stats = dict(self.flow_stats)
         
         if limit:
@@ -111,7 +101,7 @@ class TrafficStatistics:
         return stats
     
     def get_top_communicators(self, limit: int = 10) -> list:
-        """Get top IPs by traffic volume"""
+        
         sorted_ips = sorted(
             self.ip_stats.items(),
             key=lambda x: x[1]["bytes"],
@@ -120,7 +110,7 @@ class TrafficStatistics:
         return sorted_ips[:limit]
     
     def get_summary(self) -> Dict:
-        """Get overall statistics summary"""
+        
         bandwidth = self.get_bandwidth_stats()
         protocols = self.get_protocol_statistics()
         
@@ -149,7 +139,7 @@ class TrafficStatistics:
         }
     
     def reset_stats(self):
-        """Reset all statistics"""
+        
         self.total_packets = 0
         self.total_bytes = 0
         self.start_time = datetime.now()

@@ -1,8 +1,3 @@
-"""
-Logging & Reporting Module
-Stores captured data and generates analysis reports
-"""
-
 import json
 import csv
 from pathlib import Path
@@ -13,18 +8,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
 class LoggingReporting:
-    """Handles logging and report generation"""
+    
     
     def __init__(self, log_dir: str = "logs", report_dir: str = "reports"):
-        """
-        Initialize logging and reporting
         
-        Args:
-            log_dir: Directory for log files
-            report_dir: Directory for report files
-        """
         self.log_dir = Path(log_dir)
         self.report_dir = Path(report_dir)
         self.log_dir.mkdir(exist_ok=True)
@@ -35,7 +23,7 @@ class LoggingReporting:
         self.alert_log = []
     
     def log_packet(self, packet, analysis: Dict):
-        """Log packet information"""
+        
         entry = {
             "timestamp": datetime.now().isoformat(),
             "size": len(packet),
@@ -44,7 +32,7 @@ class LoggingReporting:
         self.packet_log.append(entry)
     
     def log_statistic(self, stats: Dict):
-        """Log traffic statistics"""
+        
         entry = {
             "timestamp": datetime.now().isoformat(),
             "data": stats
@@ -52,16 +40,11 @@ class LoggingReporting:
         self.statistics_log.append(entry)
     
     def log_alert(self, alert: Dict):
-        """Log detected alert"""
+        
         self.alert_log.append(alert)
     
     def export_packets_to_json(self, filename: Optional[str] = None) -> str:
-        """
-        Export packet logs to JSON file
         
-        Returns:
-            Path to exported file
-        """
         if not filename:
             filename = f"packets_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         
@@ -74,12 +57,7 @@ class LoggingReporting:
         return str(filepath)
     
     def export_packets_to_csv(self, filename: Optional[str] = None) -> str:
-        """
-        Export packet logs to CSV file
         
-        Returns:
-            Path to exported file
-        """
         if not filename:
             filename = f"packets_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
         
@@ -114,12 +92,7 @@ class LoggingReporting:
         return str(filepath)
     
     def export_alerts_to_json(self, filename: Optional[str] = None) -> str:
-        """
-        Export alert logs to JSON file
         
-        Returns:
-            Path to exported file
-        """
         if not filename:
             filename = f"alerts_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         
@@ -132,7 +105,7 @@ class LoggingReporting:
         return str(filepath)
     
     def generate_summary_report(self) -> Dict:
-        """Generate summary report of all captured data"""
+        
         return {
             "report_time": datetime.now().isoformat(),
             "total_packets": len(self.packet_log),
@@ -142,17 +115,7 @@ class LoggingReporting:
     
     def export_html_report(self, stats: Dict, alerts: List[Dict], 
                           filename: Optional[str] = None) -> str:
-        """
-        Generate HTML report with statistics and alerts
         
-        Args:
-            stats: Statistics dictionary
-            alerts: List of alerts
-            filename: Output filename
-        
-        Returns:
-            Path to generated report
-        """
         if not filename:
             filename = f"report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
         
@@ -168,74 +131,83 @@ class LoggingReporting:
     
     @staticmethod
     def _generate_html(stats: Dict, alerts: List[Dict]) -> str:
-        """Generate HTML content for report"""
+        
         html = """
+        <!DOCTYPE html>
         <html>
         <head>
-            <title>Network Analysis Report</title>
+            <title>Network Security Report</title>
             <style>
-                body { font-family: Arial, sans-serif; margin: 20px; }
-                h1 { color: #333; }
-                h2 { color: #666; margin-top: 30px; border-bottom: 2px solid #007bff; }
-                table { border-collapse: collapse; width: 100%; margin: 10px 0; }
-                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                th { background-color: #007bff; color: white; }
-                tr:nth-child(even) { background-color: #f9f9f9; }
-                .alert { background-color: #fff3cd; padding: 10px; margin: 5px 0; border-left: 4px solid #ffc107; }
-                .high { color: #dc3545; font-weight: bold; }
-                .medium { color: #fd7e14; font-weight: bold; }
-                .low { color: #28a745; font-weight: bold; }
+                body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background: #f5f5f5; color: #333; }
+                .container { max-width: 1000px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+                h1 { border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 30px; }
+                h2 { margin-top: 30px; color: #444; }
+                .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+                .stat-card { background: #f8f9fa; padding: 20px; border-radius: 6px; border: 1px solid #eee; }
+                .stat-value { font-size: 24px; font-weight: bold; color: #2196f3; }
+                table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
+                th { background: #f8f9fa; }
+                .alert-critical { color: #d32f2f; }
+                .alert-warning { color: #f57c00; }
+                .alert-info { color: #0288d1; }
             </style>
         </head>
         <body>
-            <h1>Network Traffic Analysis Report</h1>
-            <p>Generated: {timestamp}</p>
-            
-            <h2>Traffic Summary</h2>
-            <table>
-                <tr><th>Metric</th><th>Value</th></tr>
-                <tr><td>Total Packets</td><td>{total_packets}</td></tr>
-                <tr><td>Total Bytes</td><td>{total_bytes}</td></tr>
-                <tr><td>Bandwidth (Mbps)</td><td>{bandwidth}</td></tr>
-                <tr><td>Avg Packet Size</td><td>{avg_size}</td></tr>
-            </table>
-            
-            <h2>Protocol Distribution</h2>
-            <table>
-                <tr><th>Protocol</th><th>Packets</th><th>Bytes</th><th>Percentage</th></tr>
-                {protocol_rows}
-            </table>
-            
-            <h2>Detected Alerts ({alert_count})</h2>
-            {alert_rows}
-            
+            <div class="container">
+                <h1>Network Traffic Report</h1>
+                <p>Generated on: {timestamp}</p>
+                
+                <div class="grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Packets</div>
+                        <div class="stat-value">{total_packets}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Volume</div>
+                        <div class="stat-value">{total_bytes} bytes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Bandwidth</div>
+                        <div class="stat-value">{bandwidth} Mbps</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Avg Packet Size</div>
+                        <div class="stat-value">{avg_size} bytes</div>
+                    </div>
+                </div>
+                
+                <h2>Protocol Distribution</h2>
+                <table>
+                    <thead>
+                        <tr><th>Protocol</th><th>Packets</th><th>Bytes</th><th>Percentage</th></tr>
+                    </thead>
+                    <tbody>
+                        {protocol_rows}
+                    </tbody>
+                </table>
+                
+                <h2>Security Alerts ({alert_count})</h2>
+                <div>
+                    {alert_rows}
+                </div>
+            </div>
         </body>
         </html>
         """
         
-        # Format protocol rows
         protocol_rows = ""
         for proto, data in stats.get('protocol_distribution', {}).items():
-            protocol_rows += f"""
-            <tr>
-                <td>{proto}</td>
-                <td>{data['packets']}</td>
-                <td>{data['bytes']}</td>
-                <td>{data['percentage']:.2f}%</td>
-            </tr>
-            """
+            percentage = data.get('percentage', 0)
+            protocol_rows += f"<tr><td>{proto}</td><td>{data.get('count', 0)}</td><td>{data.get('bytes', 0)}</td><td>{percentage:.1f}%</td></tr>"
         
-        # Format alert rows
         alert_rows = ""
         if alerts:
-            for alert in alerts[:50]:  # Show last 50 alerts
-                severity_class = alert['severity'].lower()
-                alert_rows += f"""
-            <div class="alert">
-                <span class="{severity_class}">[{alert['severity']}]</span> 
-                <strong>{alert['type']}</strong>: {alert.get('description', 'N/A')}
-            </div>
-            """
+            alert_rows = "<table><thead><tr><th>Time</th><th>Type</th><th>Severity</th><th>Details</th></tr></thead><tbody>"
+            for alert in alerts[:50]:
+                severity_class = f"alert-{alert.get('severity', 'info')}"
+                alert_rows += f"<tr class='{severity_class}'><td>{alert.get('timestamp')}</td><td>{alert.get('type')}</td><td>{alert.get('severity')}</td><td>{alert.get('source_ip')} -> {alert.get('dest_ip')}</td></tr>"
+            alert_rows += "</tbody></table>"
         else:
             alert_rows = "<p>No alerts detected.</p>"
         
@@ -251,7 +223,7 @@ class LoggingReporting:
         )
     
     def clear_logs(self):
-        """Clear all logs"""
+        
         self.packet_log.clear()
         self.statistics_log.clear()
         self.alert_log.clear()

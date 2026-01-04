@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,11 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 </head>
+
 <body>
-    <!-- Animated Background -->
     <div class="animated-bg"></div>
-    
-    <!-- Navigation -->
+
     <nav class="navbar navbar-dark sticky-top glass-nav">
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">
@@ -27,6 +27,9 @@
                 <select class="form-select form-select-sm glass-select" id="interface-select">
                     <option value="">Loading interfaces...</option>
                 </select>
+                <button class="btn btn-glow btn-info btn-sm" id="reset-btn" onclick="resetDashboard()">
+                    <i class="fas fa-rotate-right"></i> Reset
+                </button>
                 <button class="btn btn-glow btn-success btn-sm" id="start-btn" onclick="startCapture()">
                     <i class="fas fa-play"></i> Start
                 </button>
@@ -37,11 +40,11 @@
         </div>
     </nav>
 
-    <!-- Tab Navigation -->
     <div class="container-fluid">
         <ul class="nav nav-tabs modern-tabs" id="mainTabs" role="tablist">
             <li class="nav-item">
-                <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button">
+                <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard"
+                    type="button">
                     <i class="fas fa-chart-line"></i> Dashboard
                 </button>
             </li>
@@ -57,15 +60,13 @@
                     <span class="tab-badge alert-badge-count" id="alerts-count-badge">0</span>
                 </button>
             </li>
-            <li class="nav-item">
-                <button class="nav-link" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs" type="button">
-                    <i class="fas fa-file-alt"></i> Logs
-                </button>
+            <button class="nav-link" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs" type="button">
+                <i class="fas fa-file-alt"></i> Logs
+            </button>
             </li>
         </ul>
     </div>
 
-    <!-- Tab Content -->
     <div class="tab-content" id="mainTabContent">
         <!-- Dashboard Tab -->
         <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
@@ -199,15 +200,18 @@
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Source IP</label>
-                                <input type="text" class="form-control glass-input" id="filter-src-ip" placeholder="e.g., 192.168.1.1" onkeyup="applyFilters()">
+                                <input type="text" class="form-control glass-input" id="filter-src-ip"
+                                    placeholder="e.g., 192.168.1.1" onkeyup="applyFilters()">
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Destination IP</label>
-                                <input type="text" class="form-control glass-input" id="filter-dst-ip" placeholder="e.g., 8.8.8.8" onkeyup="applyFilters()">
+                                <input type="text" class="form-control glass-input" id="filter-dst-ip"
+                                    placeholder="e.g., 8.8.8.8" onkeyup="applyFilters()">
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Port</label>
-                                <input type="number" class="form-control glass-input" id="filter-port" placeholder="e.g., 443" onkeyup="applyFilters()">
+                                <input type="number" class="form-control glass-input" id="filter-port"
+                                    placeholder="e.g., 443" onkeyup="applyFilters()">
                             </div>
                         </div>
                     </div>
@@ -373,13 +377,15 @@
                             <div class="card-body">
                                 <div class="row g-3">
                                     <div class="col-md-3">
-                                        <button class="btn btn-outline-primary w-100 export-btn" onclick="exportToJSON()">
+                                        <button class="btn btn-outline-primary w-100 export-btn"
+                                            onclick="exportToJSON()">
                                             <i class="fas fa-file-code fa-2x mb-2 d-block"></i>
                                             Export JSON
                                         </button>
                                     </div>
                                     <div class="col-md-3">
-                                        <button class="btn btn-outline-success w-100 export-btn" onclick="exportToCSV()">
+                                        <button class="btn btn-outline-success w-100 export-btn"
+                                            onclick="exportToCSV()">
                                             <i class="fas fa-file-csv fa-2x mb-2 d-block"></i>
                                             Export CSV
                                         </button>
@@ -391,7 +397,8 @@
                                         </button>
                                     </div>
                                     <div class="col-md-3">
-                                        <button class="btn btn-outline-warning w-100 export-btn" onclick="generateReport()">
+                                        <button class="btn btn-outline-warning w-100 export-btn"
+                                            onclick="generateReport()">
                                             <i class="fas fa-chart-bar fa-2x mb-2 d-block"></i>
                                             Full Report
                                         </button>
@@ -414,4 +421,5 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
+
 </html>

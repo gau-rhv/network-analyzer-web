@@ -1,8 +1,3 @@
-"""
-Network Intrusion Detection System - Network Protocol Analyzer
-A comprehensive tool for capturing, analyzing, and monitoring network traffic.
-"""
-
 __version__ = "1.0.0"
 __author__ = "Network Security Team"
 

@@ -49,7 +49,8 @@ traffic_stats = TrafficStatistics()
 alert_detection = AlertDetection()
 
 
-def capture_packets(interface, packet_count=0):
+def capture_packets(interface, packet_count=0, session_file=None):
+    global is_capturing, packet_capture
     """Capture packets and emit via WebSocket"""
     global is_capturing, packet_capture
     
@@ -131,7 +132,7 @@ def capture_packets(interface, packet_count=0):
         packet_capture.add_callback(packet_callback)
         
         print(f"[DEBUG] Calling start_capture with interface={interface}, count={packet_count}")
-        packet_capture.start_capture(interface, packet_count, None)
+        packet_capture.start_capture(interface, packet_count, None, session_file)
         print(f"[DEBUG] start_capture returned - capture thread is now running in background")
         
     except Exception as e:
@@ -194,14 +195,14 @@ def get_stats():
 
 @app.route('/api/start-capture', methods=['POST'])
 def start_capture():
-    """Start packet capture"""
     global capture_thread, is_capturing
     
     if is_capturing:
         return jsonify({'status': 'already_running'}), 400
     
-    interface = request.json.get('interface', 'en0')
-    packet_count = request.json.get('count', 0)
+    data = request.json
+    interface = data.get('interface', 'en0')
+    packet_count = data.get('count', 0)
     
     capture_thread = threading.Thread(
         target=capture_packets,
@@ -212,21 +213,33 @@ def start_capture():
     
     return jsonify({'status': 'started', 'interface': interface})
 
-
 @app.route('/api/stop-capture', methods=['POST'])
 def stop_capture():
-    """Stop packet capture"""
     global is_capturing, packet_capture
     is_capturing = False
+    
     if packet_capture:
         packet_capture.stop_capture()
-    
+        
     socketio.server.emit('status', {
         'status': 'stopped',
         'timestamp': datetime.now().isoformat()
     })
     
     return jsonify({'status': 'stopped'})
+
+@app.route('/api/reset', methods=['POST'])
+def reset_dashboard():
+    global packet_buffer, stats_buffer, traffic_stats, packet_count
+    
+    packet_buffer.clear()
+    stats_buffer.clear()
+    traffic_stats = TrafficStatistics()
+    if packet_capture:
+        packet_capture.clear_packets()
+        
+    socketio.server.emit('reset', {'timestamp': datetime.now().isoformat()})
+    return jsonify({'status': 'reset'})
 
 
 @app.route('/api/logs/<log_type>')

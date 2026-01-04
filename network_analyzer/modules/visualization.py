@@ -1,8 +1,3 @@
-"""
-Visualization Module
-Provides real-time dashboard and graphical displays of network traffic
-"""
-
 from typing import Dict, List, Optional
 from datetime import datetime
 import json
@@ -10,12 +5,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
 class Dashboard:
-    """Real-time network traffic dashboard"""
+    
     
     def __init__(self):
-        """Initialize dashboard"""
+        
         self.metrics = {
             "real_time": {},
             "historical": []
@@ -23,7 +17,7 @@ class Dashboard:
     
     def update_metrics(self, stats: Dict, alerts: List[Dict], 
                       classifier_stats: Dict):
-        """Update dashboard with latest metrics"""
+        
         self.metrics["real_time"] = {
             "timestamp": datetime.now().isoformat(),
             "statistics": stats,
@@ -33,16 +27,15 @@ class Dashboard:
         
         self.metrics["historical"].append(self.metrics["real_time"])
         
-        # Keep only last 100 historical entries
         if len(self.metrics["historical"]) > 100:
             self.metrics["historical"] = self.metrics["historical"][-100:]
     
     def get_dashboard_data(self) -> Dict:
-        """Get current dashboard data"""
+        
         return self.metrics
     
     def print_dashboard(self):
-        """Print ASCII dashboard to console"""
+        
         if not self.metrics["real_time"]:
             print("No data available yet")
             return
@@ -84,7 +77,7 @@ class Dashboard:
         print("\n" + "="*80)
     
     def generate_json_dashboard(self, filename: Optional[str] = None) -> str:
-        """Generate JSON dashboard file"""
+        
         if not filename:
             filename = f"dashboard_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         
@@ -93,13 +86,12 @@ class Dashboard:
         
         return filename
 
-
 class VisualizationHelper:
-    """Helper class for generating visualization data"""
+    
     
     @staticmethod
     def create_pie_chart_data(distribution: Dict) -> Dict:
-        """Create pie chart data for protocol distribution"""
+        
         labels = list(distribution.keys())
         values = [distribution[p] for p in labels]
         
@@ -111,7 +103,7 @@ class VisualizationHelper:
     
     @staticmethod
     def create_bar_chart_data(ip_stats: Dict, limit: int = 10) -> Dict:
-        """Create bar chart data for top IPs"""
+        
         sorted_ips = sorted(
             ip_stats.items(),
             key=lambda x: x[1]["bytes"],
@@ -121,16 +113,16 @@ class VisualizationHelper:
         return {
             "type": "bar",
             "labels": [ip for ip, _ in sorted_ips],
-            "values": [stats["bytes"] / 1_000_000 for _, stats in sorted_ips]  # Convert to MB
+            "values": [stats["bytes"] / 1_000_000 for _, stats in sorted_ips]
         }
     
     @staticmethod
     def create_timeline_data(historical: List[Dict]) -> Dict:
-        """Create timeline data for bandwidth over time"""
+        
         timestamps = []
         bandwidth_values = []
         
-        for entry in historical[-50:]:  # Last 50 entries
+        for entry in historical[-50:]:
             timestamps.append(entry.get("timestamp", ""))
             bandwidth = entry.get("statistics", {}).get("bandwidth_mbps", 0)
             bandwidth_values.append(bandwidth)

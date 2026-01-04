@@ -1,32 +1,18 @@
-"""
-Packet Filtering Module
-Filters packets based on protocol type, IP addresses, ports, and other criteria
-"""
-
 from scapy.all import IP, TCP, UDP, ICMP, Raw
 from typing import List, Optional, Callable
 import logging
 
 logger = logging.getLogger(__name__)
 
-
 class PacketFilter:
-    """Filters packets based on various criteria"""
+    
     
     def __init__(self):
-        """Initialize packet filter"""
+        
         self.filters = []
     
     def add_protocol_filter(self, protocols: List[str]) -> Callable:
-        """
-        Create filter for specific protocols
         
-        Args:
-            protocols: List of protocol names (TCP, UDP, ICMP, HTTP, FTP, DNS)
-        
-        Returns:
-            Filter function
-        """
         def filter_func(packet):
             if TCP in packet and 'TCP' in protocols:
                 return True
@@ -35,7 +21,6 @@ class PacketFilter:
             if ICMP in packet and 'ICMP' in protocols:
                 return True
             
-            # Check for application layer protocols
             if TCP in packet:
                 if 'HTTP' in protocols and (packet[TCP].dport == 80 or packet[TCP].sport == 80):
                     return True
@@ -57,16 +42,7 @@ class PacketFilter:
     
     def add_ip_filter(self, src_ip: Optional[str] = None, 
                      dst_ip: Optional[str] = None) -> Callable:
-        """
-        Create filter for source/destination IP addresses
         
-        Args:
-            src_ip: Source IP address to filter
-            dst_ip: Destination IP address to filter
-        
-        Returns:
-            Filter function
-        """
         def filter_func(packet):
             if IP not in packet:
                 return False
@@ -83,16 +59,7 @@ class PacketFilter:
     
     def add_port_filter(self, src_port: Optional[int] = None,
                        dst_port: Optional[int] = None) -> Callable:
-        """
-        Create filter for source/destination ports
         
-        Args:
-            src_port: Source port to filter
-            dst_port: Destination port to filter
-        
-        Returns:
-            Filter function
-        """
         def filter_func(packet):
             if TCP in packet:
                 if src_port and packet[TCP].sport != src_port:
@@ -114,15 +81,7 @@ class PacketFilter:
         return filter_func
     
     def apply_filters(self, packets: List) -> List:
-        """
-        Apply all filters to a list of packets
         
-        Args:
-            packets: List of packets to filter
-        
-        Returns:
-            Filtered list of packets
-        """
         if not self.filters:
             return packets
         
@@ -133,10 +92,10 @@ class PacketFilter:
         return filtered
     
     def reset_filters(self):
-        """Reset all filters"""
+        
         self.filters.clear()
         logger.info("Filters reset")
     
     def get_filter_count(self) -> int:
-        """Get number of active filters"""
+        
         return len(self.filters)

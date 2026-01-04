@@ -1,8 +1,3 @@
-"""
-Protocol Classification Module
-Classifies packets by protocol type and identifies usage patterns
-"""
-
 from scapy.all import IP, TCP, UDP, ICMP
 from typing import Dict, List, Optional
 from collections import Counter
@@ -10,9 +5,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
 class ProtocolClassifier:
-    """Classifies packets by protocol type"""
+    
     
     PROTOCOL_NAMES = {
         1: "ICMP",
@@ -44,24 +38,14 @@ class ProtocolClassifier:
     }
     
     def __init__(self):
-        """Initialize protocol classifier"""
+        
         self.protocol_stats = Counter()
         self.port_stats = Counter()
     
     def classify(self, packet) -> str:
-        """
-        Simplified classification for web interface
         
-        Args:
-            packet: Scapy packet object
-        
-        Returns:
-            Protocol name as string (e.g., "HTTP", "DNS", "TCP")
-        """
-        # Get full classification
         classification = self.classify_packet(packet)
         
-        # Return application protocol if identified, otherwise transport protocol
         app_protocol = classification.get("application", "Unknown")
         if app_protocol and app_protocol != "Unknown":
             return app_protocol
@@ -69,12 +53,7 @@ class ProtocolClassifier:
         return classification.get("transport", "Unknown")
     
     def classify_packet(self, packet) -> Dict[str, str]:
-        """
-        Classify a packet by protocol
         
-        Returns:
-            Dictionary with classification information
-        """
         classification = {
             "link": "Unknown",
             "network": "Unknown",
@@ -82,21 +61,17 @@ class ProtocolClassifier:
             "application": "Unknown"
         }
         
-        # Link layer (Ethernet)
         classification["link"] = "Ethernet"
         
-        # Network layer
         if IP in packet:
             classification["network"] = "IPv4"
         
-        # Transport layer
         if TCP in packet:
             classification["transport"] = "TCP"
             tcp_layer = packet[TCP]
             self.protocol_stats["TCP"] += 1
             self.port_stats[tcp_layer.dport] += 1
             
-            # Application layer detection
             classification["application"] = self._classify_tcp_application(
                 tcp_layer.sport, tcp_layer.dport
             )
@@ -120,12 +95,11 @@ class ProtocolClassifier:
     
     @staticmethod
     def _classify_tcp_application(sport: int, dport: int) -> str:
-        """Classify TCP application by port"""
+        
         for port in [sport, dport]:
             if port in ProtocolClassifier.PORT_SERVICES:
                 return ProtocolClassifier.PORT_SERVICES[port]
         
-        # Known port ranges
         if dport in [80, 8080, 8000, 8888]:
             return "HTTP"
         elif dport in [443, 8443]:
@@ -143,7 +117,7 @@ class ProtocolClassifier:
     
     @staticmethod
     def _classify_udp_application(sport: int, dport: int) -> str:
-        """Classify UDP application by port"""
+        
         for port in [sport, dport]:
             if port in ProtocolClassifier.PORT_SERVICES:
                 return ProtocolClassifier.PORT_SERVICES[port]
@@ -160,15 +134,15 @@ class ProtocolClassifier:
         return "Unknown-UDP"
     
     def get_protocol_distribution(self) -> Dict[str, int]:
-        """Get distribution of protocols"""
+        
         return dict(self.protocol_stats)
     
     def get_top_ports(self, limit: int = 10) -> List[tuple]:
-        """Get top N most used ports"""
+        
         return self.port_stats.most_common(limit)
     
     def get_protocol_percentage(self) -> Dict[str, float]:
-        """Get protocol distribution as percentages"""
+        
         total = sum(self.protocol_stats.values())
         if total == 0:
             return {}
@@ -179,6 +153,6 @@ class ProtocolClassifier:
         }
     
     def reset_stats(self):
-        """Reset statistics"""
+        
         self.protocol_stats.clear()
         self.port_stats.clear()
