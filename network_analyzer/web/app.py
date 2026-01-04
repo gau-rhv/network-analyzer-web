@@ -47,9 +47,11 @@ packet_analyzer = PacketAnalyzer()
 protocol_classifier = ProtocolClassifier()
 traffic_stats = TrafficStatistics()
 alert_detection = AlertDetection()
+from modules.logging_reporting import LoggingReporting
+logging_reporter = LoggingReporting()
 
 
-def capture_packets(interface, packet_count=0, session_file=None):
+def capture_packets(interface, packet_count=0):
     global is_capturing, packet_capture
     """Capture packets and emit via WebSocket"""
     global is_capturing, packet_capture
@@ -80,6 +82,16 @@ def capture_packets(interface, packet_count=0, session_file=None):
                 if analysis:
                     # Classify protocol
                     protocol = protocol_classifier.classify(packet)
+                    
+                    src_ip = analysis.get('source_ip', 'N/A')
+                    dst_ip = analysis.get('dest_ip', 'N/A')
+                    src_port = analysis.get('source_port', 'N/A')
+                    dst_port = analysis.get('dest_port', 'N/A')
+                    
+                    print(f"[PKT] {protocol} | {src_ip}:{src_port} -> {dst_ip}:{dst_port} | Size: {analysis.get('packet_size', 0)}B")
+                    
+                    # Log to file reporter
+                    logging_reporter.log_packet(packet, analysis)
                     
                     # Detect alerts
                     alert = alert_detection.check_packet(packet)
@@ -132,7 +144,7 @@ def capture_packets(interface, packet_count=0, session_file=None):
         packet_capture.add_callback(packet_callback)
         
         print(f"[DEBUG] Calling start_capture with interface={interface}, count={packet_count}")
-        packet_capture.start_capture(interface, packet_count, None, session_file)
+        packet_capture.start_capture(interface, packet_count, None)
         print(f"[DEBUG] start_capture returned - capture thread is now running in background")
         
     except Exception as e:
@@ -240,6 +252,15 @@ def reset_dashboard():
         
     socketio.server.emit('reset', {'timestamp': datetime.now().isoformat()})
     return jsonify({'status': 'reset'})
+
+@app.route('/api/system/save_logs', methods=['POST'])
+def save_logs_on_exit():
+    """Save all logs to JSON file"""
+    try:
+        filepath = logging_reporter.export_packets_to_json()
+        return jsonify({'status': 'saved', 'path': filepath})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/api/logs/<log_type>')

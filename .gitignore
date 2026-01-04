@@ -70,7 +70,11 @@ Thumbs.db
 # Logs
 logs/
 *.log
+server.log
 
 # Reports
 reports/
 *.pcap
+
+# Captures
+captures/

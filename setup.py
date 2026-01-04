@@ -10,11 +10,10 @@ setup(
     description="Network Intrusion Detection System - Network Protocol Analyzer",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/network-analyzer",
+    url="https://github.com/gau-rhv/network-analyzer-web",
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Intended Audience :: System Administrators",
         "Intended Audience :: Information Technology",
