@@ -1,11 +1,12 @@
 /* Network Analyzer - Monochrome Theme */
 :root {
-    --bg-dark: #111;
-    --bg-card: #1a1a1a;
-    --bg-hover: #222;
-    --border: #333;
-    --text: #fff0f0;
-    --text-dim: #ece6e6;
+    --bg-dark: #0a0a0a;
+    --bg-card: #151515;
+    --bg-hover: #1f1f1f;
+    --border: #2a2a2a;
+    --text: #ffffff;
+    --text-dim: #999;
+    --text-header: #ccc;
     --accent: #fff;
     --success: #4ade80;
     --warning: #fbbf24;
@@ -242,18 +243,20 @@ body {
 }
 
 /* Chart Cards */
-.chart-card .card-header {
-    background: transparent;
+.chart-card .card-header,
+.glass-card .card-header {
+    background: var(--bg-hover);
     border-bottom: 1px solid var(--border);
-    color: var(--text);
+    color: #fff;
     font-weight: 500;
-    font-size: 0.85rem;
-    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    padding: 0.85rem 1rem;
 }
 
-.chart-card .card-header i {
-    color: var(--text-dim);
-    margin-right: 0.4rem;
+.chart-card .card-header i,
+.glass-card .card-header i {
+    color: #aaa;
+    margin-right: 0.5rem;
 }
 
 .chart-card .card-body {
