@@ -22,10 +22,18 @@ A real-time network traffic monitor and intrusion detection system.
     ```
 
 3.  **Run the application**
+    
+    **Windows (Run as Administrator):**
     ```bash
-    sudo ./run_web_ui.sh
+    python run.py
     ```
-    (Sudo is required for raw packet capture)
+    
+    **macOS/Linux:**
+    ```bash
+    sudo python3 run.py
+    ```
+    
+    (Admin/sudo is required for raw packet capture)
 
 4.  **Open Dashboard**
     The CLI will launch the server on `http://127.0.0.1:5002`.

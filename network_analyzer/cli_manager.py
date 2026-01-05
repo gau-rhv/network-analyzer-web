@@ -3,13 +3,14 @@ import subprocess
 import time
 import sys
 import os
-import signal
 import threading
-import urllib.request
-import json
-import select
-import tty
-import termios
+
+IS_WINDOWS = os.name == 'nt'
+
+if not IS_WINDOWS:
+    import select
+    import tty
+    import termios
 
 GREEN = '\033[92m'
 BLUE = '\033[94m'
@@ -18,12 +19,15 @@ RED = '\033[91m'
 RESET = '\033[0m'
 CYAN = '\033[96m'
 
+if IS_WINDOWS:
+    GREEN = BLUE = YELLOW = RED = RESET = CYAN = ''
+
 SERVER_PROCESS = None
 LOG_FILE = "server.log"
 SERVER_PORT = 5002
 
 def clear_screen():
-    os.system('cls' if os.name == 'nt' else 'clear')
+    os.system('cls' if IS_WINDOWS else 'clear')
 
 def print_banner():
     clear_screen()
@@ -31,7 +35,7 @@ def print_banner():
     print(f"{BLUE}║         Network Analyzer - CLI Manager                         ║{RESET}")
     print(f"{BLUE}╚════════════════════════════════════════════════════════════════╝{RESET}")
     print("")
-    print(f"🌐 {CYAN}Web Dashboard:{RESET} http://127.0.0.1:{SERVER_PORT}/")
+    print(f"Web Dashboard: http://127.0.0.1:{SERVER_PORT}/")
     print("")
 
 def start_server(host="127.0.0.1", port=5002):
@@ -40,10 +44,8 @@ def start_server(host="127.0.0.1", port=5002):
     
     print(f"{YELLOW}Starting server on {host}:{port}...{RESET}")
     
-    # Open log file
     log_fd = open(LOG_FILE, "w")
     
-    # Start process
     cmd = [sys.executable, "-m", "network_analyzer", "--web", "--host", host, "--port", str(port)]
     
     try:
@@ -53,9 +55,8 @@ def start_server(host="127.0.0.1", port=5002):
             stderr=subprocess.STDOUT,
             cwd=os.getcwd()
         )
-        time.sleep(2) # Give it a moment to start
+        time.sleep(2)
         
-        # Check if it died immediately
         if SERVER_PROCESS.poll() is not None:
              print(f"{RED}Server failed to start. Check {LOG_FILE} for details.{RESET}")
              return False
@@ -65,17 +66,6 @@ def start_server(host="127.0.0.1", port=5002):
     except Exception as e:
         print(f"{RED}Error starting server: {e}{RESET}")
         return False
-
-def save_logs():
-    print(f"{YELLOW}Auto-saving logs to JSON...{RESET}")
-    try:
-        url = f"http://127.0.0.1:{SERVER_PORT}/api/system/save_logs"
-        req = urllib.request.Request(url, method='POST')
-        with urllib.request.urlopen(req, timeout=5) as response:
-            data = json.loads(response.read().decode())
-            print(f"{GREEN}Logs saved to: {data.get('path', 'unknown')}{RESET}")
-    except Exception as e:
-        print(f"{RED}Could not trigger auto-save (Server might be down): {e}{RESET}")
 
 def stop_server():
     global SERVER_PROCESS
@@ -89,10 +79,10 @@ def stop_server():
         SERVER_PROCESS = None
         print(f"{GREEN}Server stopped.{RESET}")
 
-def is_key_pressed():
+def is_key_pressed_unix():
     return select.select([sys.stdin], [], [], 0) == ([sys.stdin], [], [])
 
-def get_char():
+def get_char_unix():
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
     try:
@@ -104,34 +94,37 @@ def get_char():
 
 def view_logs_delayed():
     print(f"{YELLOW}Preparing logs...{RESET}")
-    print(f"{CYAN}Press 'o' to open immediately, or wait 20 seconds.{RESET}")
     
-    # 20 second delay with animation
-    try:
-        for i in range(20, 0, -1):
-            sys.stdout.write(f"\rLoading logs in {i}s... [Press 'o' to skip]")
-            sys.stdout.flush()
-            if is_key_pressed():
-                ch = get_char()
-                if ch.lower() == 'o':
-                    break
-            time.sleep(1)
-        print("\n")
-    except KeyboardInterrupt:
-        print(f"\n{YELLOW}Cancelled.{RESET}")
-        return
+    if IS_WINDOWS:
+        print(f"{CYAN}Press Enter to view logs, or wait 5 seconds.{RESET}")
+        time.sleep(5)
+    else:
+        print(f"{CYAN}Press 'o' to open immediately, or wait 20 seconds.{RESET}")
+        try:
+            for i in range(20, 0, -1):
+                sys.stdout.write(f"\rLoading logs in {i}s... [Press 'o' to skip]")
+                sys.stdout.flush()
+                if is_key_pressed_unix():
+                    ch = get_char_unix()
+                    if ch.lower() == 'o':
+                        break
+                time.sleep(1)
+            print("\n")
+        except KeyboardInterrupt:
+            print(f"\n{YELLOW}Cancelled.{RESET}")
+            return
 
     print(f"{YELLOW}Streaming logs (Press Ctrl+C to return to menu)...{RESET}")
     print(f"{BLUE}{'-'*60}{RESET}")
     try:
-        # Use tail -f to follow the file
-        subprocess.run(["tail", "-f", LOG_FILE])
+        if IS_WINDOWS:
+            subprocess.run(["powershell", "-Command", f"Get-Content -Path {LOG_FILE} -Wait"])
+        else:
+            subprocess.run(["tail", "-f", LOG_FILE])
     except KeyboardInterrupt:
-        # Catch Ctrl+C and do NOT exit, just return
         print(f"\n{BLUE}{'-'*60}{RESET}")
         print(f"{YELLOW}Stopped viewing logs. Server is still running.{RESET}")
         time.sleep(1)
-        pass
 
 def show_menu():
     while True:
@@ -170,15 +163,10 @@ def show_menu():
             time.sleep(0.5)
 
 def main():
-    # Handle clean exit on Ctrl+C at menu level
-    # Note: SIGINT in view_logs_delayed is handled locally by try/except KeyboardInterrupt
-    
-    # Auto-start server on port 5002
     if start_server(port=5002):
         try:
             show_menu()
         except KeyboardInterrupt:
-            # Fallback if Ctrl+C pressed in menu input
             print("\nExiting...")
         finally:
             stop_server()
