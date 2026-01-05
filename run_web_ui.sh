@@ -19,28 +19,5 @@ if [ ! -f "$PYTHON_PATH" ]; then
     PYTHON_PATH="python3"
 fi
 
-HOST="127.0.0.1"
-PORT="5000"
-
-# Parse arguments
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --host) HOST="$2"; shift 2 ;;
-        --port) PORT="$2"; shift 2 ;;
-        *) shift ;;
-    esac
-done
-
-echo ""
-echo "╔════════════════════════════════════════════════════════════════╗"
-echo "║         Network Analyzer - Dashboard                           ║"
-echo "╚════════════════════════════════════════════════════════════════╝"
-echo ""
-echo "🌐 Open your browser:"
-echo "   http://$HOST:$PORT"
-echo ""
-echo "Press Ctrl+C to stop"
-echo ""
-
-# Start server
-$PYTHON_PATH -m network_analyzer --web --host "$HOST" --port "$PORT"
+# Start CLI Manager
+$PYTHON_PATH network_analyzer/cli_manager.py

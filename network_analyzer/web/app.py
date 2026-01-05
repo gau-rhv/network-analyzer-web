@@ -22,6 +22,7 @@ from modules.protocol_classification import ProtocolClassifier
 from modules.traffic_statistics import TrafficStatistics
 from modules.alert_detection import AlertDetection
 from modules.visualization import Dashboard
+from modules.logging_reporting import LoggingReporting
 
 app = Flask(__name__, template_folder='templates', static_folder='static', static_url_path='/static')
 app.config['SECRET_KEY'] = 'network-analyzer-secret-2025'
@@ -47,6 +48,7 @@ packet_analyzer = PacketAnalyzer()
 protocol_classifier = ProtocolClassifier()
 traffic_stats = TrafficStatistics()
 alert_detection = AlertDetection()
+logging_reporter = LoggingReporting()
 
 
 def capture_packets(interface, packet_count=0):
@@ -54,7 +56,8 @@ def capture_packets(interface, packet_count=0):
     global is_capturing, packet_capture
     
     try:
-        packet_capture = PacketCapture(interface=interface)
+        print(f"[DEBUG] Starting packet capture on interface: {interface}")
+        packet_capture = PacketCapture()
         is_capturing = True
         
         socketio.server.emit('status', {
@@ -77,15 +80,26 @@ def capture_packets(interface, packet_count=0):
                     # Classify protocol
                     protocol = protocol_classifier.classify(packet)
                     
+                    src_ip = analysis.get('source_ip', 'N/A')
+                    dst_ip = analysis.get('dest_ip', 'N/A')
+                    src_port = analysis.get('source_port', 'N/A')
+                    dst_port = analysis.get('dest_port', 'N/A')
+                    
+                    print(f"[PKT] {protocol} | {src_ip}:{src_port} -> {dst_ip}:{dst_port} | Size: {analysis.get('packet_size', 0)}B")
+                    
+                    # Log to file reporter
+                    logging_reporter.log_packet(packet, analysis)
+                    
                     # Detect alerts
-                    alerts = alert_detection.detect(packet, analysis)
+                    alert = alert_detection.check_packet(packet)
+                    alerts = [alert['type']] if alert else []
                     
                     packet_data = {
                         'timestamp': datetime.now().isoformat(),
-                        'source_ip': analysis.get('source_ip', 'N/A'),
-                        'dest_ip': analysis.get('dest_ip', 'N/A'),
-                        'source_port': analysis.get('source_port', 'N/A'),
-                        'dest_port': analysis.get('dest_port', 'N/A'),
+                        'source_ip': src_ip,
+                        'dest_ip': dst_ip,
+                        'source_port': src_port,
+                        'dest_port': dst_port,
                         'protocol': protocol,
                         'packet_size': analysis.get('packet_size', 0),
                         'flags': analysis.get('flags', []),
@@ -93,7 +107,7 @@ def capture_packets(interface, packet_count=0):
                     }
                     
                     packet_buffer.append(packet_data)
-                    traffic_stats.add_packet(packet_data)
+                    traffic_stats.process_packet(packet)
                     
                     # Emit packet update
                     socketio.server.emit('packet_update', packet_data)
@@ -103,7 +117,7 @@ def capture_packets(interface, packet_count=0):
                         stats = {
                             'total_packets': traffic_stats.total_packets,
                             'total_bytes': traffic_stats.total_bytes,
-                            'protocol_distribution': traffic_stats.get_protocol_distribution(),
+                            'protocol_distribution': traffic_stats.get_protocol_statistics(),
                             'timestamp': datetime.now().isoformat()
                         }
                         stats_buffer.append(stats)
@@ -120,16 +134,19 @@ def capture_packets(interface, packet_count=0):
             
             return True
         
-        packet_capture.start_capture(packet_callback)
+        # Add callback to packet capture
+        packet_capture.add_callback(packet_callback)
+        
+        print(f"[DEBUG] Calling start_capture with interface={interface}, count={packet_count}")
+        packet_capture.start_capture(interface, packet_count, None)
+        print(f"[DEBUG] start_capture returned - capture thread is now running in background")
         
     except Exception as e:
-        socketio.server.emit('error', {'message': str(e)})
-    finally:
+        print(f"[DEBUG] Exception in capture_packets: {e}")
+        import traceback
+        traceback.print_exc()
         is_capturing = False
-        socketio.server.emit('status', {
-            'status': 'stopped',
-            'timestamp': datetime.now().isoformat()
-        })
+        socketio.server.emit('error', {'message': str(e)})
 
 
 @app.route('/', methods=['GET'])
@@ -209,6 +226,27 @@ def stop_capture():
     global is_capturing
     is_capturing = False
     return jsonify({'status': 'stopped'})
+
+@app.route('/api/reset', methods=['POST'])
+def reset_dashboard():
+    global packet_buffer, stats_buffer, traffic_stats
+    
+    packet_buffer.clear()
+    stats_buffer.clear()
+    traffic_stats = TrafficStatistics()
+    if packet_capture:
+        packet_capture.clear_packets()
+        
+    socketio.server.emit('reset', {'timestamp': datetime.now().isoformat()})
+    return jsonify({'status': 'reset'})
+
+@app.route('/api/system/save_logs', methods=['POST'])
+def save_logs_on_exit():
+    try:
+        filepath = logging_reporter.export_packets_to_json()
+        return jsonify({'status': 'saved', 'path': filepath})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 @socketio.on('connect')

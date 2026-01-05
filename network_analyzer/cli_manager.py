@@ -104,42 +104,19 @@ def get_char():
 
 def view_logs_delayed():
     print(f"{YELLOW}Preparing logs...{RESET}")
-    print(f"{CYAN}Press 'o' to open immediately, or wait 20 seconds.{RESET}\n")
-    
-    # Network animation frames
-    frames = [
-        "  [PC] ─────→ ◉ ─────→ [SERVER]",
-        "  [PC] ──────→ ◉ ────→ [SERVER]",
-        "  [PC] ───────→ ◉ ───→ [SERVER]",
-        "  [PC] ────────→ ◉ ──→ [SERVER]",
-        "  [PC] ─────────→ ◉ ─→ [SERVER]",
-        "  [PC] ──────────→ ◉ → [SERVER]",
-        "  [PC] ───────────→ ◉  [SERVER]",
-        "  [PC] ────────────→ ◉ [SERVER]",
-        "  [PC]  ◉ ←───────────  [SERVER]",
-        "  [PC] ← ◉ ──────────── [SERVER]",
-        "  [PC] ←─ ◉ ─────────── [SERVER]",
-        "  [PC] ←── ◉ ────────── [SERVER]",
-        "  [PC] ←─── ◉ ───────── [SERVER]",
-        "  [PC] ←──── ◉ ──────── [SERVER]",
-        "  [PC] ←───── ◉ ─────── [SERVER]",
-        "  [PC] ←────── ◉ ────── [SERVER]",
-    ]
+    print(f"{CYAN}Press 'o' to open immediately, or wait 20 seconds.{RESET}")
     
     # 20 second delay with animation
     try:
         for i in range(20, 0, -1):
-            frame = frames[(20 - i) % len(frames)]
-            sys.stdout.write(f"\r{CYAN}{frame}{RESET}  {YELLOW}[{i}s]{RESET}  {GREEN}Press 'o' to skip{RESET}")
+            sys.stdout.write(f"\rLoading logs in {i}s... [Press 'o' to skip]")
             sys.stdout.flush()
             if is_key_pressed():
                 ch = get_char()
                 if ch.lower() == 'o':
-                    print(f"\n{GREEN}Skipped!{RESET}\n")
                     break
             time.sleep(1)
-        else:
-            print(f"\n{GREEN}Ready!{RESET}\n")
+        print("\n")
     except KeyboardInterrupt:
         print(f"\n{YELLOW}Cancelled.{RESET}")
         return
