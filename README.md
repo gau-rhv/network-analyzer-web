@@ -25,7 +25,7 @@ A real-time network traffic monitor and intrusion detection system.
     
     **Windows (Run as Administrator):**
     ```bash
-    python run.py
+    python3 run.py
     ```
     
     **macOS/Linux:**
